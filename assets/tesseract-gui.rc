@@ -1,0 +1,5 @@
+/* The icon of the executable, built from the artwork of tesseract-crypt.
+ *
+ * SPDX-License-Identifier: MIT
+ */
+IDI_ICON1 ICON "tesseract-gui.ico"

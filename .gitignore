@@ -1,0 +1,25 @@
+# build trees
+build/
+build-*/
+cmake-build-*/
+
+# Qt / CMake droppings
+*.user
+*.autosave
+CMakeCache.txt
+CMakeFiles/
+CMakeUserPresets.json
+
+# binaries and packaging output
+*.exe
+*.dll
+*.a
+*.o
+*.obj
+dist/
+
+# editor/OS noise
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
