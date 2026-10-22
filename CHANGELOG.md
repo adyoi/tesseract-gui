@@ -6,9 +6,9 @@ Semua perubahan penting pada Tesseract Crypt GUI dicatat di sini, mengikuti
 
 ## [Unreleased]
 
-## [1.0.0] — 2026-10-21
+## [0.1.0] — 2026-10-22
 
-Rilis pertama.
+Rilis perdana.
 
 ### Ditambahkan
 
@@ -59,6 +59,9 @@ Rilis pertama.
   pustaka Qt dan plugin-nya, `cmake/collect_runtime.cmake` menyalin seluruh
   rantai dependensi (ICU, freetype, harfbuzz, brotli, zstd, runtime MinGW)
   ke sebelah executable, sehingga program berjalan tanpa menyiapkan `PATH`.
+- **GUI subsystem Windows**: binary menggunakan `WIN32_EXECUTABLE` secara
+  default (tanpa jendela konsol latar), dengan opsi `-DTESSGUI_CONSOLE=ON`
+  untuk debugging.
 
 ### Catatan
 
@@ -66,3 +69,6 @@ Rilis pertama.
   sedangkan rilis CLI menautkannya statis. Format berkas dan kunci identik.
 - Ikon jendela mengikuti tema gelap/terang sistem; logo memakai warna
   gradien yang sama dengan logo `tesseract-crypt`.
+
+[1.0.0]: https://github.com/adyoi/tesseract-gui/releases/tag/v1.0.0
+[0.1.0]: https://github.com/adyoi/tesseract-gui/releases/tag/v0.1.0

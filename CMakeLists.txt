@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.16)
 
 project(tesseract-gui
-    VERSION 1.0.0
+    VERSION 0.1.0
     DESCRIPTION "Qt6 desktop front-end for tesseract-crypt (libtesseract_crypt)"
-    HOMEPAGE_URL "https://github.com/adyoi/tesseract-crypt"
+    HOMEPAGE_URL "https://github.com/adyoi/tesseract-gui"
     LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -16,6 +16,15 @@ endif()
 
 option(TESSGUI_BUILD_TESTS "Build the test suite" ON)
 option(TESSGUI_CONSOLE "Keep a console window (useful while debugging)" OFF)
+
+# A console-subsystem binary makes Windows open a console for the process
+# (a second `conhost.exe` plus a `ConsoleWindowClass` window).  That window
+# sits behind the interface and looks like a stray prompt, so the default is
+# a GUI-subsystem binary and the option only exists for debugging.
+if(TESSGUI_CONSOLE)
+    message(STATUS "tesseract-gui: console subsystem enabled - Windows will open an extra "
+                   "console window behind the interface")
+endif()
 
 set(TESSGUI_TESSERACT_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../tesseract-crypt"
     CACHE PATH

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tesseract Crypt GUI</title>
+  <meta name="description" content="Antarmuka Qt6 untuk libtesseract_crypt — enkripsi/dekripsi berkas dan teks dengan kunci publik/privat, multi-penerima, tanda tangan, verifikasi.">
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;line-height:1.6;margin:0;background:#0b1020;color:#e6e6e6}
+    header{padding:48px 16px;text-align:center;background:radial-gradient(1200px 400px at 50% 0,#1a2540,#0b1020)}
+    main{max-width:980px;margin:0 auto;padding:24px 16px}
+    .btn{display:inline-block;padding:10px 16px;margin:6px;border-radius:8px;background:#3b82f6;color:#fff;text-decoration:none}
+    .btn.ghost{background:transparent;border:1px solid #3b82f6}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+    figure{margin:0;background:#121a2b;border-radius:12px;overflow:hidden}
+    figure img{width:100%;display:block}
+    figcaption{padding:10px 14px;color:#b8c0e0}
+    footer{padding:24px 16px;text-align:center;color:#7f89b8}
+    a{color:#8ab4ff}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Tesseract Crypt GUI</h1>
+    <p>Antarmuka Qt6 untuk <a href="https://github.com/adyoi/tesseract-crypt">libtesseract_crypt</a></p>
+    <p>
+      <a class="btn" href="https://github.com/adyoi/tesseract-gui/releases">Unduh</a>
+      <a class="btn ghost" href="https://github.com/adyoi/tesseract-gui">Sumber</a>
+      <a class="btn ghost" href="https://github.com/adyoi/tesseract-gui/blob/main/CHANGELOG.md">Changelog</a>
+      <a class="btn ghost" href="index.html">English</a>
+    </p>
+  </header>
+  <main>
+    <h2>Tangkapan layar</h2>
+    <div class="grid">
+      <figure><img src="main-encrypt.png" alt="Jendela utama enkripsi"><figcaption>Jendela utama — Enkripsi</figcaption></figure>
+      <figure><img src="main-decrypt.png" alt="Jendela utama dekripsi"><figcaption>Jendela utama — Dekripsi</figcaption></figure>
+      <figure><img src="keygen.png" alt="Dialog pasangan kunci"><figcaption>Tools ? Key pair</figcaption></figure>
+      <figure><img src="options.png" alt="Dialog opsi"><figcaption>Edit ? Options</figcaption></figure>
+      <figure><img src="text-encrypt.png" alt="Enkripsi teks"><figcaption>Tools ? Encrypt text</figcaption></figure>
+      <figure><img src="inspect.png" alt="Inspeksi"><figcaption>Tools ? Inspect a message</figcaption></figure>
+      <figure><img src="about.png" alt="Tentang"><figcaption>Help ? About</figcaption></figure>
+    </div>
+    <h2>Fitur</h2>
+    <ul>
+      <li>Enkripsi/dekripsi berkas (kunci publik atau passphrase), multi-penerima (v2)</li>
+      <li>Enkripsi/dekripsi teks</li>
+      <li>Pembuatan kunci, ekstraksi kunci publik, info kunci</li>
+      <li>Tanda tangan terpisah (sign/verify)</li>
+      <li>Inspeksi pesan</li>
+      <li>Drag &amp; drop, operasi latar belakang, penulisan atomik</li>
+      <li>100% kompatibel dengan CLI <code>tesseract-crypt</code></li>
+    </ul>
+  </main>
+  <footer>© 2026 adyoi — Lisensi MIT</footer>
+</body>
+</html>

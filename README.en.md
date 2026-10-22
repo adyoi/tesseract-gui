@@ -53,6 +53,10 @@ The Indonesian documentation in [README.md](README.md) carries the full
 CLI ↔ GUI feature table, build instructions and the deliberate behaviour
 differences.
 
+## Download / Releases
+
+Download the latest release from [GitHub Releases](https://github.com/adyoi/tesseract-gui/releases) or see [CHANGELOG.md](CHANGELOG.md).
+
 ## Building
 
 ```bash
@@ -83,3 +87,4 @@ TESSGUI_CLI=/path/to/tesseract-crypt ctest --test-dir build --output-on-failure
 ## License
 
 MIT — see [LICENSE](LICENSE).
+

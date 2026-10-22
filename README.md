@@ -134,9 +134,21 @@ menyalin seluruh rantai dependensi (ICU, freetype, harfbuzz, brotli, zstd,
 runtime MinGW) ke sebelah `.exe`. Karena itu program bisa dijalankan tanpa
 menyiapkan `PATH`:
 
-```bash
-C:\Windows\System32\cmd.exe /c "set PATH=C:\Windows\System32 && build\tesseract-gui.exe"
+```powershell
+Start-Process -FilePath ".\build\tesseract-gui.exe"
 ```
+
+> **Jangan** menjalankan lewat `cmd.exe /c "..."` untuk pemakaian harian:
+> `cmd.exe` tetap memegang jendela konsol selama GUI berjalan, sehingga
+> jendela konsol dengan prompt-nya tampak **di belakang** jendela aplikasi.
+> `Start-Process` (PowerShell) atau `.\build\tesseract-gui.exe` langsung
+> tidak memunculkan jendela konsol sama sekali.
+
+Opsi `-DTESSGUI_CONSOLE=ON` mengubah executable menjadi *console subsystem*
+(berguna saat debugging). Konsekuensinya Windows membuka konsol sendiri:
+muncul proses kedua `conhost.exe` dan jendela `ConsoleWindowClass` yang
+tertumpuk di belakang jendela aplikasi. Biarkan **OFF** untuk build yang
+dipakai pengguna.
 
 Untuk paket yang bisa dipindah ke mesin lain, jalankan `cmake --install build`
 atau salin seluruh isi folder build (pustaka Qt, plugin, dan DLL runtime).
@@ -188,3 +200,4 @@ Ikon program (`.ico`) dibuat dari logo yang sama:
 ## Lisensi
 
 MIT — lihat [LICENSE](LICENSE).
+

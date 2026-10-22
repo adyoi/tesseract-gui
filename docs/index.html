@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tesseract Crypt GUI</title>
+  <meta name="description" content="Qt6 desktop front-end for libtesseract_crypt — encrypt/decrypt files and text with public/private keys, multi-recipient, signing, verification.">
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;line-height:1.6;margin:0;background:#0b1020;color:#e6e6e6}
+    header{padding:48px 16px;text-align:center;background:radial-gradient(1200px 400px at 50% 0,#1a2540,#0b1020)}
+    main{max-width:980px;margin:0 auto;padding:24px 16px}
+    .btn{display:inline-block;padding:10px 16px;margin:6px;border-radius:8px;background:#3b82f6;color:#fff;text-decoration:none}
+    .btn.ghost{background:transparent;border:1px solid #3b82f6}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+    figure{margin:0;background:#121a2b;border-radius:12px;overflow:hidden}
+    figure img{width:100%;display:block}
+    figcaption{padding:10px 14px;color:#b8c0e0}
+    footer{padding:24px 16px;text-align:center;color:#7f89b8}
+    a{color:#8ab4ff}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Tesseract Crypt GUI</h1>
+    <p>Qt6 front-end for <a href="https://github.com/adyoi/tesseract-crypt">libtesseract_crypt</a></p>
+    <p>
+      <a class="btn" href="https://github.com/adyoi/tesseract-gui/releases">Download</a>
+      <a class="btn ghost" href="https://github.com/adyoi/tesseract-gui">Source</a>
+      <a class="btn ghost" href="https://github.com/adyoi/tesseract-gui/blob/main/CHANGELOG.md">Changelog</a>
+      <a class="btn ghost" href="id.html">Bahasa Indonesia</a>
+    </p>
+  </header>
+  <main>
+    <h2>Screenshots</h2>
+    <div class="grid">
+      <figure><img src="main-encrypt.png" alt="Main window encrypt"><figcaption>Main window — Encrypt</figcaption></figure>
+      <figure><img src="main-decrypt.png" alt="Main window decrypt"><figcaption>Main window — Decrypt</figcaption></figure>
+      <figure><img src="keygen.png" alt="Key pair"><figcaption>Tools ? Key pair</figcaption></figure>
+      <figure><img src="options.png" alt="Options"><figcaption>Edit ? Options</figcaption></figure>
+      <figure><img src="text-encrypt.png" alt="Text encrypt"><figcaption>Tools ? Encrypt text</figcaption></figure>
+      <figure><img src="inspect.png" alt="Inspect"><figcaption>Tools ? Inspect a message</figcaption></figure>
+      <figure><img src="about.png" alt="About"><figcaption>Help ? About</figcaption></figure>
+    </div>
+    <h2>Features</h2>
+    <ul>
+      <li>Encrypt/decrypt files (public-key or passphrase), multi-recipient (v2)</li>
+      <li>Encrypt/decrypt text</li>
+      <li>Key generation, public key extraction, key info</li>
+      <li>Detached signatures (sign/verify)</li>
+      <li>Inspect messages</li>
+      <li>Drag &amp; drop, background threads, atomic writes</li>
+      <li>100% compatible with <code>tesseract-crypt</code> CLI</li>
+    </ul>
+  </main>
+  <footer>© 2026 adyoi — MIT License</footer>
+</body>
+</html>
