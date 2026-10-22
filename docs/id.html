@@ -4,7 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Tesseract Crypt GUI</title>
-  <meta name="description" content="Antarmuka Qt6 untuk libtesseract_crypt � enkripsi/dekripsi berkas dan teks dengan kunci publik/privat, multi-penerima, tanda tangan, verifikasi.">
+  <meta name="description" content="Antarmuka Qt6 untuk libtesseract_crypt — enkripsi/dekripsi berkas dan teks dengan kunci publik/privat, multi-penerima, tanda tangan, verifikasi.">
+  <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
   <style>
     body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;line-height:1.6;margin:0;background:#0b1020;color:#e6e6e6}
     header{padding:48px 16px;text-align:center;background:radial-gradient(1200px 400px at 50% 0,#1a2540,#0b1020)}
@@ -17,10 +18,12 @@
     figcaption{padding:10px 14px;color:#b8c0e0}
     footer{padding:24px 16px;text-align:center;color:#7f89b8}
     a{color:#8ab4ff}
+    ul{padding-left:20px}
   </style>
 </head>
 <body>
-  <header>`n    <img src="assets/logo.svg" alt="Tesseract Crypt" width="64" height="64" style="margin-bottom:12px">
+  <header>
+    <img src="assets/logo.svg" alt="Tesseract Crypt GUI" width="64" height="64" style="margin-bottom:12px">
     <h1>Tesseract Crypt GUI</h1>
     <p>Antarmuka Qt6 untuk <a href="https://github.com/adyoi/tesseract-crypt">libtesseract_crypt</a></p>
     <p>
@@ -33,25 +36,28 @@
   <main>
     <h2>Tangkapan layar</h2>
     <div class="grid">
-      <figure><img src="main-encrypt.png" alt="Jendela utama enkripsi"><figcaption>Jendela utama � Enkripsi</figcaption></figure>
-      <figure><img src="main-decrypt.png" alt="Jendela utama dekripsi"><figcaption>Jendela utama � Dekripsi</figcaption></figure>
-      <figure><img src="keygen.png" alt="Dialog pasangan kunci"><figcaption>Tools ? Key pair</figcaption></figure>
-      <figure><img src="options.png" alt="Dialog opsi"><figcaption>Edit ? Options</figcaption></figure>
-      <figure><img src="text-encrypt.png" alt="Enkripsi teks"><figcaption>Tools ? Encrypt text</figcaption></figure>
-      <figure><img src="inspect.png" alt="Inspeksi"><figcaption>Tools ? Inspect a message</figcaption></figure>
-      <figure><img src="about.png" alt="Tentang"><figcaption>Help ? About</figcaption></figure>
+      <figure><img src="assets/main-encrypt.png" alt="Jendela utama mode Enkripsi"><figcaption>Jendela utama — Enkripsi</figcaption></figure>
+      <figure><img src="assets/main-decrypt.png" alt="Jendela utama mode Dekripsi"><figcaption>Jendela utama — Dekripsi</figcaption></figure>
+      <figure><img src="assets/keygen.png" alt="Dialog pasangan kunci"><figcaption>Tools → Key pair</figcaption></figure>
+      <figure><img src="assets/options.png" alt="Dialog pengaturan"><figcaption>Edit → Options</figcaption></figure>
+      <figure><img src="assets/text-encrypt.png" alt="Dialog enkripsi teks"><figcaption>Tools → Encrypt text</figcaption></figure>
+      <figure><img src="assets/inspect.png" alt="Dialog inspeksi pesan"><figcaption>Tools → Inspect a message</figcaption></figure>
+      <figure><img src="assets/about.png" alt="Dialog tentang"><figcaption>Help → About</figcaption></figure>
     </div>
     <h2>Fitur</h2>
     <ul>
       <li>Enkripsi/dekripsi berkas (kunci publik atau passphrase), multi-penerima (v2)</li>
-      <li>Enkripsi/dekripsi teks</li>
-      <li>Pembuatan kunci, ekstraksi kunci publik, info kunci</li>
-      <li>Tanda tangan terpisah (sign/verify)</li>
-      <li>Inspeksi pesan</li>
-      <li>Drag &amp; drop, operasi latar belakang, penulisan atomik</li>
+      <li>Enkripsi/dekripsi teks langsung dari GUI</li>
+      <li>Pembuatan kunci, ekstraksi kunci publik, dan informasi kunci</li>
+      <li>Tanda tangan terpisah (sign dan verify)</li>
+      <li>Inspeksi pesan terenkripsi</li>
+      <li>Drag &amp; drop berkas</li>
+      <li>Operasi di latar belakang agar UI tetap responsif</li>
+      <li>Penulisan berkas secara atomik</li>
       <li>100% kompatibel dengan CLI <code>tesseract-crypt</code></li>
+      <li>Secara default menggunakan GUI subsystem di Windows (tanpa jendela konsol)</li>
     </ul>
   </main>
-  <footer>� 2026 adyoi � Lisensi MIT</footer>
+  <footer>© 2026 adyoi — Lisensi MIT</footer>
 </body>
 </html>

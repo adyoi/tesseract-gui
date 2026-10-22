@@ -4,7 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Tesseract Crypt GUI</title>
-  <meta name="description" content="Qt6 desktop front-end for libtesseract_crypt � encrypt/decrypt files and text with public/private keys, multi-recipient, signing, verification.">
+  <meta name="description" content="Qt6 desktop front-end for libtesseract_crypt — file/string encryption with X25519, Ed25519, XChaCha20-Poly1305 &amp; Argon2id.">
+  <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
   <style>
     body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;line-height:1.6;margin:0;background:#0b1020;color:#e6e6e6}
     header{padding:48px 16px;text-align:center;background:radial-gradient(1200px 400px at 50% 0,#1a2540,#0b1020)}
@@ -17,10 +18,12 @@
     figcaption{padding:10px 14px;color:#b8c0e0}
     footer{padding:24px 16px;text-align:center;color:#7f89b8}
     a{color:#8ab4ff}
+    ul{padding-left:20px}
   </style>
 </head>
 <body>
-  <header>`n    <img src="assets/logo.svg" alt="Tesseract Crypt" width="64" height="64" style="margin-bottom:12px">
+  <header>
+    <img src="assets/logo.svg" alt="Tesseract Crypt GUI" width="64" height="64" style="margin-bottom:12px">
     <h1>Tesseract Crypt GUI</h1>
     <p>Qt6 front-end for <a href="https://github.com/adyoi/tesseract-crypt">libtesseract_crypt</a></p>
     <p>
@@ -33,25 +36,28 @@
   <main>
     <h2>Screenshots</h2>
     <div class="grid">
-      <figure><img src="main-encrypt.png" alt="Main window encrypt"><figcaption>Main window � Encrypt</figcaption></figure>
-      <figure><img src="main-decrypt.png" alt="Main window decrypt"><figcaption>Main window � Decrypt</figcaption></figure>
-      <figure><img src="keygen.png" alt="Key pair"><figcaption>Tools ? Key pair</figcaption></figure>
-      <figure><img src="options.png" alt="Options"><figcaption>Edit ? Options</figcaption></figure>
-      <figure><img src="text-encrypt.png" alt="Text encrypt"><figcaption>Tools ? Encrypt text</figcaption></figure>
-      <figure><img src="inspect.png" alt="Inspect"><figcaption>Tools ? Inspect a message</figcaption></figure>
-      <figure><img src="about.png" alt="About"><figcaption>Help ? About</figcaption></figure>
+      <figure><img src="assets/main-encrypt.png" alt="Main window in Encrypt mode"><figcaption>Main window — Encrypt</figcaption></figure>
+      <figure><img src="assets/main-decrypt.png" alt="Main window in Decrypt mode"><figcaption>Main window — Decrypt</figcaption></figure>
+      <figure><img src="assets/keygen.png" alt="Key pair dialog"><figcaption>Tools → Key pair</figcaption></figure>
+      <figure><img src="assets/options.png" alt="Options dialog"><figcaption>Edit → Options</figcaption></figure>
+      <figure><img src="assets/text-encrypt.png" alt="Encrypt text dialog"><figcaption>Tools → Encrypt text</figcaption></figure>
+      <figure><img src="assets/inspect.png" alt="Inspect message dialog"><figcaption>Tools → Inspect a message</figcaption></figure>
+      <figure><img src="assets/about.png" alt="About dialog"><figcaption>Help → About</figcaption></figure>
     </div>
     <h2>Features</h2>
     <ul>
       <li>Encrypt/decrypt files (public-key or passphrase), multi-recipient (v2)</li>
-      <li>Encrypt/decrypt text</li>
-      <li>Key generation, public key extraction, key info</li>
-      <li>Detached signatures (sign/verify)</li>
-      <li>Inspect messages</li>
-      <li>Drag &amp; drop, background threads, atomic writes</li>
-      <li>100% compatible with <code>tesseract-crypt</code> CLI</li>
+      <li>Encrypt/decrypt text directly from the GUI</li>
+      <li>Key generation, public key extraction, and key information</li>
+      <li>Detached signatures (sign and verify)</li>
+      <li>Inspect encrypted messages</li>
+      <li>Drag &amp; drop support</li>
+      <li>Background processing to keep the UI responsive</li>
+      <li>Atomic file writes</li>
+      <li>100% compatible with the <code>tesseract-crypt</code> CLI</li>
+      <li>Windows GUI subsystem by default (no extra console window)</li>
     </ul>
   </main>
-  <footer>� 2026 adyoi � MIT License</footer>
+  <footer>© 2026 adyoi — MIT License</footer>
 </body>
 </html>
