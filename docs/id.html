@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Tesseract Crypt GUI</title>
-  <meta name="description" content="Antarmuka Qt6 untuk libtesseract_crypt — enkripsi/dekripsi berkas dan teks dengan kunci publik/privat, multi-penerima, tanda tangan, verifikasi.">
+  <meta name="description" content="Antarmuka desktop Qt6 untuk libtesseract_crypt — enkripsi berkas/teks dengan X25519, Ed25519, XChaCha20-Poly1305 &amp; Argon2id.">
   <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
   <style>
     body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;line-height:1.6;margin:0;background:#0b1020;color:#e6e6e6}
@@ -29,33 +29,35 @@
     <p>
       <a class="btn" href="https://github.com/adyoi/tesseract-gui/releases">Unduh</a>
       <a class="btn ghost" href="https://github.com/adyoi/tesseract-gui">Sumber</a>
-      <a class="btn ghost" href="https://github.com/adyoi/tesseract-gui/blob/main/CHANGELOG.md">Changelog</a>
+      <a class="btn ghost" href="https://github.com/adyoi/tesseract-gui/blob/main/CHANGELOG.md">Catatan Perubahan</a>
       <a class="btn ghost" href="index.html">English</a>
     </p>
   </header>
   <main>
-    <h2>Tangkapan layar</h2>
+    <h2>Tangkapan Layar</h2>
     <div class="grid">
       <figure><img src="assets/main-encrypt.png" alt="Jendela utama mode Enkripsi"><figcaption>Jendela utama — Enkripsi</figcaption></figure>
       <figure><img src="assets/main-decrypt.png" alt="Jendela utama mode Dekripsi"><figcaption>Jendela utama — Dekripsi</figcaption></figure>
-      <figure><img src="assets/keygen.png" alt="Dialog pasangan kunci"><figcaption>Tools → Key pair</figcaption></figure>
-      <figure><img src="assets/options.png" alt="Dialog pengaturan"><figcaption>Edit → Options</figcaption></figure>
-      <figure><img src="assets/text-encrypt.png" alt="Dialog enkripsi teks"><figcaption>Tools → Encrypt text</figcaption></figure>
-      <figure><img src="assets/inspect.png" alt="Dialog inspeksi pesan"><figcaption>Tools → Inspect a message</figcaption></figure>
-      <figure><img src="assets/about.png" alt="Dialog tentang"><figcaption>Help → About</figcaption></figure>
+      <figure><img src="assets/keygen.png" alt="Dialog pasangan kunci"><figcaption>Tools → Pasangan kunci</figcaption></figure>
+      <figure><img src="assets/options.png" alt="Dialog opsi"><figcaption>Edit → Opsi</figcaption></figure>
+      <figure><img src="assets/text-encrypt.png" alt="Dialog enkripsi teks"><figcaption>Tools → Enkripsi teks</figcaption></figure>
+      <figure><img src="assets/inspect.png" alt="Dialog inspeksi pesan"><figcaption>Tools → Inspeksi pesan</figcaption></figure>
+      <figure><img src="assets/about.png" alt="Dialog tentang"><figcaption>Help → Tentang</figcaption></figure>
     </div>
     <h2>Fitur</h2>
     <ul>
-      <li>Enkripsi/dekripsi berkas (kunci publik atau passphrase), multi-penerima (v2)</li>
+      <li>Enkripsi/dekripsi berkas (kunci publik atau kata sandi), multi-penerima (v2)</li>
+      <li>Kontainer PE-split untuk berkas besar (terdeteksi otomatis saat dekripsi)</li>
+      <li>Batch enkripsi/dekripsi dari direktori (bisa menyertakan subdirektori)</li>
       <li>Enkripsi/dekripsi teks langsung dari GUI</li>
-      <li>Pembuatan kunci, ekstraksi kunci publik, dan informasi kunci</li>
-      <li>Tanda tangan terpisah (sign dan verify)</li>
+      <li>Pembuatan kunci, ekspor kunci publik, dan info kunci</li>
+      <li>Tanda tangan lepas (tanda tangan dan verifikasi)</li>
       <li>Inspeksi pesan terenkripsi</li>
-      <li>Drag &amp; drop berkas</li>
-      <li>Operasi di latar belakang agar UI tetap responsif</li>
-      <li>Penulisan berkas secara atomik</li>
+      <li>Drag &amp; drop</li>
+      <li>Pemrosesan latar belakang agar UI tetap responsif</li>
+      <li>Penulisan berkas atomik</li>
       <li>100% kompatibel dengan CLI <code>tesseract-crypt</code></li>
-      <li>Secara default menggunakan GUI subsystem di Windows (tanpa jendela konsol)</li>
+      <li>Windows GUI subsystem secara default (tanpa jendela konsol tambahan)</li>
     </ul>
   </main>
   <footer>© 2026 adyoi — Lisensi MIT</footer>
