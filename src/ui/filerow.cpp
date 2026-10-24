@@ -121,6 +121,11 @@ void FileRow::browse() {
         if (!file.isEmpty()) picked << file;
         break;
     }
+    case OpenDirectory: {
+        const QString dir = QFileDialog::getExistingDirectory(this, title, start, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+        if (!dir.isEmpty()) picked << dir;
+        break;
+    }
     }
 
     if (picked.isEmpty()) return;

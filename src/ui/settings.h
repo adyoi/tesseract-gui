@@ -1,8 +1,3 @@
-/*
- * settings.h — the preferences the Options dialog edits (QSettings backed).
- *
- * SPDX-License-Identifier: MIT
- */
 #ifndef TESSGUI_SETTINGS_H
 #define TESSGUI_SETTINGS_H
 
@@ -11,26 +6,27 @@
 
 namespace tessgui {
 
-/** Everything the Options dialog remembers between runs. */
 struct GuiSettings {
-    /* Encrypt */
     bool armor = false;
-    quint32 chunkSize = 0;              /* 0 = format default                 */
-    bool signWhenPossible = true;       /* sign when a sender key is set      */
-    QString senderKey;                  /* private key used to sign messages  */
+    quint32 chunkSize = 0;
+    bool signWhenPossible = true;
+    QString senderKey;
 
-    /* Decrypt */
     bool requireSigner = false;
-    QString signerKey;                  /* public key the signer must match   */
+    QString signerKey;
 
-    /* Keygen */
     bool lockNewKeys = false;
-    quint32 kdfOps = 0;                 /* 0 = library default                */
-    quint32 kdfMemMiB = 0;              /* 0 = library default                */
+    quint32 kdfOps = 0;
+    quint32 kdfMemMiB = 0;
 
-    /* Interface */
     bool confirmOverwrite = true;
     QString lastDirectory;
+
+    bool usePe = false;
+    quint32 peChunkMiB = 256;
+    bool includeSubdirs = false;
+    QString batchInputDir;
+    QString batchOutputDir;
 
     static GuiSettings load() {
         QSettings s;
@@ -41,21 +37,25 @@ struct GuiSettings {
         g.signWhenPossible = s.value(QStringLiteral("sign"), g.signWhenPossible).toBool();
         g.senderKey = s.value(QStringLiteral("senderKey")).toString();
         s.endGroup();
-
         s.beginGroup(QStringLiteral("decrypt"));
         g.requireSigner = s.value(QStringLiteral("requireSigner"), g.requireSigner).toBool();
         g.signerKey = s.value(QStringLiteral("signerKey")).toString();
         s.endGroup();
-
         s.beginGroup(QStringLiteral("keygen"));
         g.lockNewKeys = s.value(QStringLiteral("lock"), g.lockNewKeys).toBool();
         g.kdfOps = s.value(QStringLiteral("kdfOps"), g.kdfOps).toUInt();
         g.kdfMemMiB = s.value(QStringLiteral("kdfMemMiB"), g.kdfMemMiB).toUInt();
         s.endGroup();
-
         s.beginGroup(QStringLiteral("ui"));
         g.confirmOverwrite = s.value(QStringLiteral("confirmOverwrite"), g.confirmOverwrite).toBool();
         g.lastDirectory = s.value(QStringLiteral("lastDirectory")).toString();
+        s.endGroup();
+        s.beginGroup(QStringLiteral("pe"));
+        g.usePe = s.value(QStringLiteral("usePe"), g.usePe).toBool();
+        g.peChunkMiB = s.value(QStringLiteral("peChunkMiB"), g.peChunkMiB).toUInt();
+        g.includeSubdirs = s.value(QStringLiteral("includeSubdirs"), g.includeSubdirs).toBool();
+        g.batchInputDir = s.value(QStringLiteral("batchInputDir")).toString();
+        g.batchOutputDir = s.value(QStringLiteral("batchOutputDir")).toString();
         s.endGroup();
         return g;
     }
@@ -68,31 +68,33 @@ struct GuiSettings {
         s.setValue(QStringLiteral("sign"), signWhenPossible);
         s.setValue(QStringLiteral("senderKey"), senderKey);
         s.endGroup();
-
         s.beginGroup(QStringLiteral("decrypt"));
         s.setValue(QStringLiteral("requireSigner"), requireSigner);
         s.setValue(QStringLiteral("signerKey"), signerKey);
         s.endGroup();
-
         s.beginGroup(QStringLiteral("keygen"));
         s.setValue(QStringLiteral("lock"), lockNewKeys);
         s.setValue(QStringLiteral("kdfOps"), kdfOps);
         s.setValue(QStringLiteral("kdfMemMiB"), kdfMemMiB);
         s.endGroup();
-
         s.beginGroup(QStringLiteral("ui"));
         s.setValue(QStringLiteral("confirmOverwrite"), confirmOverwrite);
         s.setValue(QStringLiteral("lastDirectory"), lastDirectory);
         s.endGroup();
+        s.beginGroup(QStringLiteral("pe"));
+        s.setValue(QStringLiteral("usePe"), usePe);
+        s.setValue(QStringLiteral("peChunkMiB"), peChunkMiB);
+        s.setValue(QStringLiteral("includeSubdirs"), includeSubdirs);
+        s.setValue(QStringLiteral("batchInputDir"), batchInputDir);
+        s.setValue(QStringLiteral("batchOutputDir"), batchOutputDir);
+        s.endGroup();
         s.sync();
     }
 
-    /** Limits the KDF parameters the CLI accepts to something sane. */
     quint64 kdfMemBytes() const {
         return static_cast<quint64>(kdfMemMiB) * 1024ull * 1024ull;
     }
 };
 
-} /* namespace tessgui */
-
-#endif /* TESSGUI_SETTINGS_H */
+}
+#endif

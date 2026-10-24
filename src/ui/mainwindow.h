@@ -16,6 +16,7 @@ class QLabel;
 class QLineEdit;
 class QPushButton;
 class QRadioButton;
+class QSpinBox;
 
 namespace tessgui {
 
@@ -44,6 +45,8 @@ private slots:
     void onSourceChanged();
     void onRun();
     void onKeygen();
+    void onBatchEncrypt();
+    void onBatchDecrypt();
     void onOptions();
     void onAbout();
     void onAboutQt();
@@ -75,6 +78,11 @@ private:
 
     QPushButton *m_keygenButton = nullptr;
     QPushButton *m_runButton = nullptr;
+    QPushButton *m_batchEncButton = nullptr;
+    QPushButton *m_batchDecButton = nullptr;
+    QCheckBox *m_peCheck = nullptr;
+    QSpinBox *m_peSpin = nullptr;
+    QCheckBox *m_subdirsCheck = nullptr;
     QLabel *m_status = nullptr;
 };
 

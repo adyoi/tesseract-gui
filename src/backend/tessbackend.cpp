@@ -397,6 +397,215 @@ KeyResult keyInfo(const QString &keyFile, const QString &passphrase) {
 }
 
 /* ------------------------------------------------------------------ */
+/* PE split: large files as a sequence of encrypted chunks            */
+/* ------------------------------------------------------------------ */
+/* The container format lives in src/core/tess_pe.c (libtesseract_crypt);
+ * this file only adapts it to the GUI's Result/OpenResult types.        */
+
+/** True when the file starts with the "PE" marker. */
+bool isPeFile(const QString &path) {
+    return tess_is_pe_file(utf8(path).constData()) != 0;
+}
+
+/** Public wrapper: does this file carry the "PE" marker? */
+bool isPeContainer(const QString &path) { return isPeFile(path); }
+
+Result sealFilePe(const QString &inFile, const QString &outFile,
+                  const QStringList &recipients, const QString &senderKeyFile,
+                  const QString &senderPassphrase, bool sign, bool usePassphrase,
+                  const QString &passphrase, quint32 chunkSize, bool armor,
+                  quint32 peChunkMiB) {
+    Result bad;
+    if (!checkChunkSize(chunkSize, &bad)) return bad;
+    if (recipients.isEmpty() && !usePassphrase) {
+        return Result::failure(TESS_ERR_INVALID_ARG);
+    }
+    if (!recipients.isEmpty() && usePassphrase) {
+        Result r = Result::failure(TESS_ERR_INVALID_ARG);
+        r.message = QStringLiteral("choose either recipient keys or a passphrase, not both");
+        return r;
+    }
+    if (usePassphrase && passphrase.isEmpty()) {
+        Result r = Result::failure(TESS_ERR_INVALID_ARG);
+        r.message = QStringLiteral("the passphrase is empty");
+        return r;
+    }
+
+    QFileInfo finfo(inFile);
+    if (!finfo.exists() || !finfo.isFile()) {
+        Result r = Result::failure(TESS_ERR_IO);
+        r.message = QStringLiteral("cannot read %1").arg(inFile);
+        return r;
+    }
+
+    std::vector<KeyPtr> owned;
+    owned.reserve(static_cast<size_t>(recipients.size()));
+    std::vector<const tess_key *> views;
+    for (const QString &path : recipients) {
+        KeyPtr k;
+        const QByteArray p = utf8(path);
+        tess_status st = tess_key_load(p.constData(), nullptr, k.out());
+        if (st != TESS_OK) {
+            Result r;
+            r.ok = false;
+            r.status = st;
+            r.message = QStringLiteral("loading recipient %1 failed: %2")
+                            .arg(QFileInfo(path).fileName(), statusText(st));
+            return r;
+        }
+        owned.push_back(std::move(k));
+        views.push_back(owned.back().get());
+    }
+
+    KeyPtr sender;
+    if (!senderKeyFile.isEmpty() && !owned.empty()) {
+        bool needs = false, wrong = false;
+        tess_status st = loadKey(senderKeyFile, senderPassphrase, &sender, &needs, &wrong);
+        if (st != TESS_OK) {
+            Result r;
+            r.ok = false;
+            r.status = st;
+            r.message = QStringLiteral("loading sender key %1 failed: %2")
+                            .arg(QFileInfo(senderKeyFile).fileName(), statusText(st));
+            r.needsPassphrase = needs;
+            r.wrongPassphrase = wrong;
+            return r;
+        }
+        if (tess_key_is_locked(sender.get())) {
+            Result r = Result::failure(TESS_ERR_PASSPHRASE);
+            r.message = QStringLiteral("the sender key is still locked");
+            r.needsPassphrase = true;
+            return r;
+        }
+    }
+    if (sign && !sender) sign = false;
+
+    const QByteArray pass = utf8(passphrase);
+    tess_seal_file_options opt;
+    tess_seal_file_options_init(&opt);
+    if (views.size() == 1) {
+        opt.recipient_public = views.front();
+    } else if (!views.empty()) {
+        opt.recipients = views.data();
+        opt.recipient_count = views.size();
+    }
+    opt.sender_secret = sender.get();
+    opt.sign = sign ? 1 : 0;
+    opt.passphrase = usePassphrase ? passArg(pass) : nullptr;
+    opt.chunk_size = chunkSize;
+
+    tess_pe_options pe;
+    tess_pe_options_init(&pe);
+    pe.chunk_bytes = static_cast<uint64_t>(peChunkMiB) * 1024ull * 1024ull;
+    pe.armor = armor ? 1 : 0;
+
+    tess_status st = tess_seal_file_pe(utf8(inFile).constData(),
+                                       utf8(outFile).constData(), &opt, &pe);
+    if (st != TESS_OK) {
+        Result r;
+        r.ok = false;
+        r.status = st;
+        r.message = QStringLiteral("encrypting %1 failed: %2")
+                        .arg(QFileInfo(inFile).fileName(), statusText(st));
+        return r;
+    }
+    return Result::success(QStringLiteral("encrypted to %1").arg(QFileInfo(outFile).fileName()));
+}
+
+OpenResult openFilePe(const QString &inFile, const QString &outFile,
+                       const QString &keyFile, const QString &keyPassphrase,
+                       const QString &requiredSignerFile, bool usePassphrase,
+                       const QString &passphrase) {
+    OpenResult out;
+
+    if (keyFile.isEmpty() && !usePassphrase) {
+        out.status = TESS_ERR_INVALID_ARG;
+        out.message = QStringLiteral("choose a private key or a passphrase");
+        return out;
+    }
+    if (!keyFile.isEmpty() && usePassphrase) {
+        out.status = TESS_ERR_INVALID_ARG;
+        out.message = QStringLiteral("choose either a private key or a passphrase, not both");
+        return out;
+    }
+    if (usePassphrase && passphrase.isEmpty()) {
+        out.status = TESS_ERR_INVALID_ARG;
+        out.message = QStringLiteral("the passphrase is empty");
+        return out;
+    }
+
+    KeyPtr secret;
+    if (!keyFile.isEmpty()) {
+        bool needs = false, wrong = false;
+        tess_status st = loadKey(keyFile, keyPassphrase, &secret, &needs, &wrong);
+        if (st != TESS_OK) {
+            out.status = st;
+            out.message = QStringLiteral("loading %1 failed: %2")
+                              .arg(QFileInfo(keyFile).fileName(), statusText(st));
+            out.needsPassphrase = needs;
+            out.wrongPassphrase = wrong;
+            return out;
+        }
+        if (tess_key_is_locked(secret.get())) {
+            out.status = TESS_ERR_PASSPHRASE;
+            out.message = QStringLiteral("the key is still locked");
+            out.needsPassphrase = true;
+            return out;
+        }
+    }
+
+    KeyPtr signer;
+    if (!requiredSignerFile.isEmpty()) {
+        const QByteArray p = utf8(requiredSignerFile);
+        tess_status st = tess_key_load(p.constData(), nullptr, signer.out());
+        if (st != TESS_OK) {
+            out.status = st;
+            out.message = QStringLiteral("loading signer %1 failed: %2")
+                              .arg(QFileInfo(requiredSignerFile).fileName(), statusText(st));
+            return out;
+        }
+    }
+
+    const QByteArray pass = utf8(passphrase);
+    int signedFlag = 0;
+    tess_open_file_options opt;
+    tess_open_file_options_init(&opt);
+    opt.recipient_secret = secret.get();
+    opt.passphrase = usePassphrase ? passArg(pass) : nullptr;
+    opt.required_signer = signer.get();
+    opt.out_signed = &signedFlag;
+
+    tess_status st = tess_open_file_pe(utf8(inFile).constData(), utf8(outFile).constData(), &opt);
+    if (st != TESS_OK) {
+        out.status = st;
+        out.message = QStringLiteral("decrypting %1 failed: %2")
+                          .arg(QFileInfo(inFile).fileName(), statusText(st));
+        setPassphraseHints(&out, false);
+        return out;
+    }
+
+    out.ok = true;
+    out.status = TESS_OK;
+    out.signedFlag = signedFlag != 0;
+    out.outPath = outFile;
+    if (out.signedFlag) {
+        out.message = QStringLiteral("decrypted to %1 — signature OK")
+                          .arg(QFileInfo(outFile).fileName());
+    } else if (!requiredSignerFile.isEmpty()) {
+        QFile::remove(outFile);
+        out.ok = false;
+        out.status = TESS_ERR_SIGNATURE;
+        out.outPath.clear();
+        out.message = QStringLiteral("the message is not signed — the output file was removed");
+        return out;
+    } else {
+        out.message = QStringLiteral("decrypted to %1 (message was not signed)")
+                          .arg(QFileInfo(outFile).fileName());
+    }
+    return out;
+}
+
+/* ------------------------------------------------------------------ */
 /* Encrypt                                                             */
 /* ------------------------------------------------------------------ */
 
@@ -651,6 +860,14 @@ OpenResult openFile(const QString &inFile, const QString &outFile,
                     const QString &requiredSignerFile, bool usePassphrase,
                     const QString &passphrase) {
     OpenResult out;
+
+    /* A PE container announces itself with the "PE" marker: the decrypt
+     * side recognises it and unpacks the chunks. */
+    if (isPeFile(inFile)) {
+        return openFilePe(inFile, outFile, keyFile, keyPassphrase,
+                          requiredSignerFile, usePassphrase, passphrase);
+    }
+
     if (keyFile.isEmpty() && !usePassphrase) {
         out.status = TESS_ERR_INVALID_ARG;
         out.message = QStringLiteral("choose a private key or a passphrase");

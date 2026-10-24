@@ -23,8 +23,11 @@
 #include <QAction>
 #include <QApplication>
 #include <QCheckBox>
+#include <QDir>
+#include <QDirIterator>
 #include <QDragEnterEvent>
 #include <QDropEvent>
+#include <QFileDialog>
 #include <QFileInfo>
 #include <QHBoxLayout>
 #include <QIcon>
@@ -34,8 +37,10 @@
 #include <QMenuBar>
 #include <QMessageBox>
 #include <QMimeData>
+#include <QProgressDialog>
 #include <QPushButton>
 #include <QRadioButton>
+#include <QSpinBox>
 #include <QStatusBar>
 #include <QUrl>
 #include <QVBoxLayout>
@@ -122,6 +127,10 @@ void MainWindow::buildMenus() {
     connect(toolsMenu->addAction(tr("Decrypt text...")), &QAction::triggered, this,
             [this] { TextCryptDialog dialog(TextCryptDialog::Mode::Decrypt, this); dialog.exec(); });
 
+    toolsMenu->addSeparator();
+    connect(toolsMenu->addAction(tr("Batch encrypt from directory...")), &QAction::triggered, this, &MainWindow::onBatchEncrypt);
+    connect(toolsMenu->addAction(tr("Batch decrypt from directory...")), &QAction::triggered, this, &MainWindow::onBatchDecrypt);
+
     QMenu *helpMenu = menuBar()->addMenu(tr("&Help"));
     connect(helpMenu->addAction(tr("&About")), &QAction::triggered, this, &MainWindow::onAbout);
     connect(helpMenu->addAction(tr("About &Qt")), &QAction::triggered, this, &MainWindow::onAboutQt);
@@ -182,6 +191,23 @@ void MainWindow::buildForm() {
     passLayout->addWidget(m_passphraseCheck);
     passLayout->addWidget(m_passphraseEdit, 1);
     layout->addWidget(m_passphraseRow);
+
+    /* PE split + batch options */
+    auto *peRow = new QHBoxLayout;
+    m_peCheck = new QCheckBox(tr("Use PE-split for large files"), central);
+    m_peSpin = new QSpinBox(central);
+    m_peSpin->setRange(1, 1024);
+    m_peSpin->setValue(256);
+    m_peSpin->setSuffix(tr(" MiB"));
+    m_peSpin->setEnabled(false);
+    peRow->addWidget(m_peCheck);
+    peRow->addWidget(m_peSpin);
+    peRow->addStretch(1);
+    layout->addLayout(peRow);
+    connect(m_peCheck, &QCheckBox::toggled, m_peSpin, &QSpinBox::setEnabled);
+
+    m_subdirsCheck = new QCheckBox(tr("Include subdirectories (batch)"), central);
+    layout->addWidget(m_subdirsCheck);
 
     layout->addSpacing(10);
 
@@ -274,6 +300,9 @@ void MainWindow::applySettings() {
     m_settings = GuiSettings::load();
     m_passphraseCheck->setChecked(false);
     m_passphraseEdit->clear();
+    if (m_peCheck) m_peCheck->setChecked(m_settings.usePe);
+    if (m_peSpin) m_peSpin->setValue(m_settings.peChunkMiB == 0 ? 256 : m_settings.peChunkMiB);
+    if (m_subdirsCheck) m_subdirsCheck->setChecked(m_settings.includeSubdirs);
     if (!m_settings.senderKey.isEmpty()) {
         m_status->setStyleSheet(QString());
         m_status->setText(tr("Messages are signed with %1")
@@ -346,10 +375,20 @@ void MainWindow::runEncrypt() {
     const QString senderKey = m_settings.senderKey;
     const QString fileName = QFileInfo(source).fileName();
 
+    /* PE split: a container of sealed chunks, marked with "PE" so the
+     * decrypt side recognises it without an extra flag. */
+    const bool usePe = m_peCheck && m_peCheck->isChecked();
+    const quint32 peChunkMiB = m_peSpin ? static_cast<quint32>(m_peSpin->value()) : 256u;
+
     QString senderPassphrase;
     for (int attempt = 0; attempt < kMaxPassphraseAttempts; ++attempt) {
         const Result result = runBlocking<Result>(
             this, tr("Encrypting %1...").arg(fileName), [&] {
+                if (usePe) {
+                    return sealFilePe(source, destination, recipients, senderKey,
+                                      senderPassphrase, sign, usePassphrase, passphrase,
+                                      chunk, armor, peChunkMiB);
+                }
                 return sealFile(source, destination, recipients, senderKey, senderPassphrase,
                                 sign, usePassphrase, passphrase, chunk, armor);
             });
@@ -454,7 +493,148 @@ void MainWindow::onAbout() {
 }
 
 void MainWindow::onAboutQt() {
-    QMessageBox::aboutQt(this);
+    QMessageBox::aboutQt(this, tr("About Qt"));
+}
+
+
+
+void MainWindow::onBatchEncrypt() {
+    m_settings = GuiSettings::load();
+    QString dir = QFileDialog::getExistingDirectory(this, tr("Select directory to encrypt"), m_settings.batchInputDir.isEmpty() ? m_settings.lastDirectory : m_settings.batchInputDir, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+    if (dir.isEmpty()) return;
+    m_settings.batchInputDir = dir;
+    QString outDir = QFileDialog::getExistingDirectory(this, tr("Select output directory"), m_settings.batchOutputDir.isEmpty() ? dir : m_settings.batchOutputDir, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+    if (outDir.isEmpty()) outDir = dir;
+    m_settings.batchOutputDir = outDir;
+    bool recursive = m_subdirsCheck ? m_subdirsCheck->isChecked() : m_settings.includeSubdirs;
+    m_settings.includeSubdirs = recursive;
+    bool usePe = m_peCheck ? m_peCheck->isChecked() : m_settings.usePe;
+    m_settings.usePe = usePe;
+    quint32 peMb = m_peSpin ? (quint32)m_peSpin->value() : m_settings.peChunkMiB;
+    m_settings.peChunkMiB = peMb;
+    m_settings.save();
+
+    bool usePassphraseMode = m_passphraseCheck && m_passphraseCheck->isChecked();
+    QStringList recipients;
+    if (usePassphraseMode) {
+        QString pass = m_passphraseEdit->text();
+        if (pass.isEmpty()) {
+            bool accepted = false;
+            pass = askNewPassphrase(this, tr("Batch encrypt with a passphrase"), &accepted);
+            if (!accepted || pass.isEmpty()) return;
+            m_passphraseEdit->setText(pass);
+        }
+    } else {
+        recipients = m_keyPublic ? m_keyPublic->paths() : QStringList();
+        if (recipients.isEmpty()) { QMessageBox::warning(this, tr("Tesseract Crypt"), tr("Select at least one recipient public key, or tick \\\"Use a passphrase\\\".")); return; }
+        for (const QString &r : recipients) {
+            if (!QFileInfo::exists(r)) { QMessageBox::warning(this, tr("Tesseract Crypt"), tr("%1 does not exist.").arg(r)); return; }
+        }
+    }
+    QString senderKey = (m_settings.signWhenPossible && !m_settings.senderKey.isEmpty()) ? m_settings.senderKey : QString();
+    QString senderPass;
+    if (!senderKey.isEmpty()) senderPass = QString();
+
+    QDir d(dir);
+    QList<QFileInfo> files;
+    if (recursive) {
+        QDirIterator it(dir, QDir::Files, QDirIterator::Subdirectories);
+        while (it.hasNext()) files << QFileInfo(it.next());
+    } else {
+        files = d.entryInfoList(QDir::Files);
+    }
+    if (files.isEmpty()) { QMessageBox::information(this, tr("Tesseract Crypt"), tr("No files found.")); return; }
+
+    QProgressDialog prog(tr("Encrypting..."), tr("Cancel"), 0, files.size(), this);
+    prog.setWindowModality(Qt::WindowModal);
+    int done = 0;
+    for (const auto &fi : files) {
+        if (prog.wasCanceled()) break;
+        prog.setLabelText(fi.fileName());
+        prog.setValue(done);
+        QString in = fi.absoluteFilePath();
+        QString rel = d.relativeFilePath(fi.absolutePath());
+        QString outPath = outDir;
+        if (recursive && !rel.isEmpty() && rel != ".") {
+            QDir(outDir).mkpath(rel);
+            outPath = QDir(outDir).filePath(rel + "/" + fi.fileName() + ".enc");
+        } else {
+            outPath = QDir(outDir).filePath(fi.fileName() + ".enc");
+        }
+        QString pass = usePassphraseMode ? m_passphraseEdit->text() : QString();
+        Result r;
+        if (usePe) {
+            r = sealFilePe(in, outPath, recipients, senderKey, senderPass,
+                           m_settings.signWhenPossible && !senderKey.isEmpty(),
+                           usePassphraseMode, pass, m_settings.chunkSize,
+                           m_settings.armor, peMb);
+        } else {
+            r = sealFile(in, outPath, recipients, senderKey, senderPass,
+                          m_settings.signWhenPossible && !senderKey.isEmpty(),
+                          usePassphraseMode, pass, m_settings.chunkSize,
+                          m_settings.armor);
+        }
+        if (!r.ok) { m_status->setText(r.message); }
+        done++;
+    }
+    prog.setValue(files.size());
+    m_status->setText(tr("Batch encrypt done"));
+}
+
+void MainWindow::onBatchDecrypt() {
+    m_settings = GuiSettings::load();
+    QString dir = QFileDialog::getExistingDirectory(this, tr("Select directory to decrypt"), m_settings.batchInputDir.isEmpty() ? m_settings.lastDirectory : m_settings.batchInputDir, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+    if (dir.isEmpty()) return;
+    m_settings.batchInputDir = dir;
+    QString outDir = QFileDialog::getExistingDirectory(this, tr("Select output directory"), m_settings.batchOutputDir.isEmpty() ? dir : m_settings.batchOutputDir, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+    if (outDir.isEmpty()) outDir = dir;
+    m_settings.batchOutputDir = outDir;
+    bool recursive = m_subdirsCheck ? m_subdirsCheck->isChecked() : m_settings.includeSubdirs;
+    m_settings.includeSubdirs = recursive;
+    m_settings.save();
+
+    QString keyFile = m_keyPrivate ? m_keyPrivate->path() : QString();
+    QString reqSigner;
+    if (m_settings.requireSigner && !m_settings.signerKey.isEmpty()) reqSigner = m_settings.signerKey;
+    bool usePass = m_passphraseCheck && m_passphraseCheck->isChecked();
+    QString pass = usePass ? m_passphraseEdit->text() : QString();
+    if (!usePass && keyFile.isEmpty()) { QMessageBox::warning(this, tr("Tesseract Crypt"), tr("Select a private key or use passphrase.")); return; }
+
+    QDir d(dir);
+    QList<QFileInfo> files;
+    if (recursive) {
+        QDirIterator it(dir, QDir::Files, QDirIterator::Subdirectories);
+        while (it.hasNext()) files << QFileInfo(it.next());
+    } else {
+        files = d.entryInfoList(QDir::Files);
+    }
+    if (files.isEmpty()) { QMessageBox::information(this, tr("Tesseract Crypt"), tr("No files found.")); return; }
+
+    QProgressDialog prog(tr("Decrypting..."), tr("Cancel"), 0, files.size(), this);
+    prog.setWindowModality(Qt::WindowModal);
+    int done = 0;
+    for (const auto &fi : files) {
+        if (prog.wasCanceled()) break;
+        prog.setLabelText(fi.fileName());
+        prog.setValue(done);
+        QString in = fi.absoluteFilePath();
+        QString rel = d.relativeFilePath(fi.absolutePath());
+        QString base = fi.fileName();
+        if (base.endsWith(".enc")) base.chop(4);
+        else base += ".dec";
+        QString outPath = outDir;
+        if (recursive && !rel.isEmpty() && rel != ".") {
+            QDir(outDir).mkpath(rel);
+            outPath = QDir(outDir).filePath(rel + "/" + base);
+        } else {
+            outPath = QDir(outDir).filePath(base);
+        }
+        OpenResult r = openFile(in, outPath, keyFile, QString(), reqSigner, usePass, pass);
+        if (!r.ok) { m_status->setText(r.message); }
+        done++;
+    }
+    prog.setValue(files.size());
+    m_status->setText(tr("Batch decrypt done"));
 }
 
 /* ------------------------------------------------------------------ */

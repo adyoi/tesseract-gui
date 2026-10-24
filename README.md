@@ -69,6 +69,10 @@ persis seperti sketsa. Berkas juga bisa di-*drag & drop* ke jendela.
 | `encrypt -k SENDER.key` | Options → *Sender key* (+ *Sign messages*) |
 | `encrypt --no-sign` | matikan *Sign messages* di Options |
 | `encrypt --armor` | Options → *Write armored output* |
+| `encrypt --pe` / `--pe-chunk-size` | centang *Use PE-split for large files* + spin box MiB |
+| `encrypt --dir` / `--out-dir` / `--recursive` | Tools → *Batch encrypt from directory…* + centang *Include subdirectories (batch)* |
+| `decrypt` (auto PE) | otomatis terdeteksi dari penanda `PE` |
+| `decrypt --dir` / `--out-dir` / `--recursive` | Tools → *Batch decrypt from directory…* |
 | `encrypt --chunk-size N` | Options → *Chunk size* (KiB) |
 | `encrypt --passphrase` | centang **Encrypt with a passphrase** |
 | `encrypt --text "…"` | Tools → Encrypt text |

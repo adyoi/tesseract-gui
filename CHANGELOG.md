@@ -6,7 +6,14 @@ Semua perubahan penting pada Tesseract Crypt GUI dicatat di sini, mengikuti
 
 ## [Unreleased]
 
-## [0.1.0] — 2026-10-22
+### Ditambahkan
+
+- **Kontainer PE (PE-split)** untuk berkas besar: kotak centang *Use PE-split
+  for large files* + spin box MiB; backend sekarang memanggil library
+  `tess_seal_file_pe`/`tess_open_file_pe` (penanda `PE` terdeteksi otomatis
+  saat dekripsi).
+- **Batch direktori/subdirektori**: menu *Tools → Batch encrypt/decrypt from
+  directory…* dan kotak centang *Include subdirectories (batch)*. — 2026-10-22
 
 Rilis perdana.
 

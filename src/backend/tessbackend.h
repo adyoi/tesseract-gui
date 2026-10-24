@@ -101,6 +101,26 @@ TextResult openText(const QString &input, const QString &keyFile,
                     const QString &keyPassphrase, const QString &requiredSignerFile,
                     bool usePassphrase, const QString &passphrase);
 
+/* --------------------------------------------------- PE split containers */
+/**
+ * Encrypt a large file as a sequence of sealed chunks.  The container
+ * starts with the ASCII marker "PE", so the decrypt side recognises it
+ * without an extra flag.
+ */
+Result sealFilePe(const QString &inFile, const QString &outFile,
+                  const QStringList &recipients, const QString &senderKeyFile,
+                  const QString &senderPassphrase, bool sign, bool usePassphrase,
+                  const QString &passphrase, quint32 chunkSize, bool armor,
+                  quint32 peChunkMiB);
+
+/** Decrypt a PE container back into one plain file. */
+OpenResult openFilePe(const QString &inFile, const QString &outFile,
+                       const QString &keyFile, const QString &keyPassphrase,
+                       const QString &requiredSignerFile, bool usePassphrase,
+                       const QString &passphrase);
+
+/** True when the file starts with the "PE" marker. */
+bool isPeContainer(const QString &path);
 /* ------------------------------------------------------ sign / verify   */
 Result signFile(const QString &inFile, const QString &keyFile,
                 const QString &passphrase, const QString &outFile);

@@ -29,6 +29,7 @@ public:
         OpenFile,      /* pick one existing file        */
         MultiOpenFile, /* pick several existing files   */
         SaveFile,      /* pick the file to write        */
+        OpenDirectory, /* pick a directory               */
     };
 
     FileRow(const QString &label, Kind kind, QWidget *parent = nullptr);
